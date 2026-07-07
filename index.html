@@ -25,7 +25,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--te
 .field label{font-size:11px;font-weight:700;color:var(--g-mid);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
 .field input{width:100%;padding:12px 14px;border:2px solid #E8E8E8;border-radius:10px;font-size:14px;outline:none;transition:border .2s}
 .field input:focus{border-color:var(--g-mid)}
-#login-err{font-size:12px;color:var(--red);min-height:18px;margin:2px 0 10px;text-align:center}
+#login-err{font-size:12px;min-height:18px;margin:2px 0 10px;text-align:center}
 
 .btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:13px;border:none;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s}
 .btn:active{transform:scale(.97)}
@@ -85,13 +85,6 @@ tr:nth-child(even) td{background:#FAFBFA}
 .b-lunas{background:var(--g-tag);color:var(--g-dark)}
 .b-belum{background:var(--red-bg);color:var(--red)}
 
-.setting-info{background:var(--g-lite);border-left:4px solid var(--g-btn);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--g-dark);line-height:1.7;margin-bottom:14px}
-.url-display{background:#F5F5F5;border:1.5px dashed #BDBDBD;border-radius:8px;padding:10px 12px;font-size:11px;color:#616161;word-break:break-all;margin-bottom:10px}
-.url-display strong{display:block;font-size:12px;color:var(--text);margin-bottom:3px}
-#url-input{width:100%;padding:11px 14px;border:2px solid #E5E5E5;border-radius:10px;font-size:13px;outline:none;margin-bottom:8px;transition:border .2s}
-#url-input:focus{border-color:var(--g-mid)}
-#koneksi-status{font-size:12px;color:var(--gray);margin-top:8px;min-height:18px}
-
 .loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:28px;color:var(--gray);font-size:13px}
 .spin{width:20px;height:20px;border:3px solid #E0E0E0;border-top-color:var(--g-btn);border-radius:50%;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -109,7 +102,7 @@ tr:nth-child(even) td{background:#FAFBFA}
 <div id="screen-login">
   <div class="login-box">
     <div class="logo">🏘️</div>
-    <h2>Iuran Warga</h2>
+    <h2>Iuran Warga RT 07</h2>
     <p class="sub">Masuk sebagai petugas untuk melanjutkan</p>
     <div class="field">
       <label>Nama Petugas</label>
@@ -128,8 +121,8 @@ tr:nth-child(even) td{background:#FAFBFA}
   <header>
     <div style="font-size:22px">🏘️</div>
     <div class="hd-info">
-      <h1>Iuran Warga</h1>
-      <p id="hd-sub">Juli 2026 - Juni 2027</p>
+      <h1>Iuran Warga RT 07</h1>
+      <p>Agustus 2026 - Juli 2027</p>
     </div>
     <button id="btn-out" onclick="doLogout()">Keluar</button>
   </header>
@@ -137,7 +130,6 @@ tr:nth-child(even) td{background:#FAFBFA}
   <div class="tabs">
     <div class="tab on"  onclick="goTab('scan')">📷 Scan QR</div>
     <div class="tab"     onclick="goTab('rekap')">📊 Rekap</div>
-    <div class="tab"     onclick="goTab('setting')">⚙️ Pengaturan</div>
   </div>
 
   <div class="page on" id="pg-scan">
@@ -179,49 +171,14 @@ tr:nth-child(even) td{background:#FAFBFA}
       <div id="area-rekap"><div class="loading"><div class="spin"></div> Memuat...</div></div>
     </div>
   </div>
-
-  <div class="page" id="pg-setting">
-    <div class="card">
-      <div class="card-title">🔗 Koneksi Google Sheets</div>
-      <div class="setting-info">
-        Paste URL deployment Google Apps Script di bawah ini.<br>
-        URL didapat dari: <strong>Apps Script → Deploy → Manage Deployments → copy URL</strong>
-      </div>
-      <div class="url-display">
-        <strong>URL Aktif:</strong>
-        <span id="url-aktif">Belum diatur</span>
-      </div>
-      <input type="text" id="url-input" placeholder="https://script.google.com/macros/s/.../exec">
-      <div class="btn-row">
-        <button class="btn btn-g btn-sm" onclick="simpanUrl()">💾 Simpan</button>
-        <button class="btn btn-o btn-sm" onclick="testUrl()">🔌 Test</button>
-      </div>
-      <div id="koneksi-status"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">👤 Petugas Aktif</div>
-      <div class="row-info"><span class="lbl">Login sebagai</span><span class="val" id="info-petugas">-</span></div>
-      <div style="margin-top:12px">
-        <button class="btn btn-o btn-sm" onclick="doLogout()">🚪 Logout</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">📋 Cara Tambah/Ganti Petugas</div>
-      <ol style="font-size:12px;line-height:2.1;padding-left:18px;color:#424242">
-        <li>Buka <strong>Google Apps Script</strong></li>
-        <li>Cari bagian <code>const PETUGAS</code></li>
-        <li>Tambah atau ganti nama dan PIN</li>
-        <li>Klik <strong>Save</strong></li>
-        <li><strong>Deploy → Manage Deployments → pilih deployment → New Version → Deploy</strong></li>
-        <li>Petugas baru langsung bisa login tanpa update file GitHub</li>
-      </ol>
-    </div>
-  </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
+// ── URL Apps Script sudah tertanam — tidak perlu setting manual ──
+const APPS_URL = "https://script.google.com/macros/s/AKfycbxRFTR4Tn61VwOCqSh2pNWfU3BIluDqVN54Cq3lYavGZ8PVrB43JXGx_unWnR1GjIP-pQ/exec";
+
 const BULAN = [
   "Agustus 2026","September 2026","Oktober 2026","November 2026",
   "Desember 2026","Januari 2027","Februari 2027","Maret 2027",
@@ -230,71 +187,38 @@ const BULAN = [
 
 let petugas=null, allWarga=null, scanner=null, scanKode=null, scanStatus={};
 
-function getUrl(){ return localStorage.getItem('iuran_url')||'' }
-
-function simpanUrl(){
-  const v=document.getElementById('url-input').value.trim();
-  if(!v){ toast('URL tidak boleh kosong','err'); return; }
-  localStorage.setItem('iuran_url',v);
-  document.getElementById('url-aktif').textContent=v;
-  toast('URL tersimpan','ok');
-}
-
-async function testUrl(){
-  const url=getUrl();
-  if(!url){ toast('Isi URL dulu','err'); return; }
-  document.getElementById('koneksi-status').textContent='Menghubungkan...';
-  try{
-    const r=await fetchApi({action:'ping'});
-    document.getElementById('koneksi-status').textContent=r.ok?'Terhubung ke Google Sheets!':'Error: '+r.msg;
-  }catch(e){
-    document.getElementById('koneksi-status').textContent='Gagal. Cek URL dan koneksi internet.';
-  }
-}
-
 async function fetchApi(body){
-  const url=getUrl();
-  if(!url) throw new Error('URL belum diatur');
-  const resp=await fetch(url,{
+  const resp = await fetch(APPS_URL, {
     method:'POST',
     headers:{'Content-Type':'text/plain'},
-    body:JSON.stringify(body)
+    body: JSON.stringify(body)
   });
   return resp.json();
 }
 
-// Login sekarang verifikasi via Apps Script — tidak perlu update GitHub kalau ganti petugas
+// ── Login via Apps Script ─────────────────────────────────────
 async function doLogin(){
-  const nama=document.getElementById('in-nama').value.trim();
-  const pin=document.getElementById('in-pin').value.trim();
-  if(!nama||!pin){ document.getElementById('login-err').textContent='Isi nama dan PIN'; return; }
-  if(!getUrl()){ document.getElementById('login-err').textContent='URL belum diatur, set di Pengaturan dulu'; return; }
+  const nama = document.getElementById('in-nama').value.trim();
+  const pin  = document.getElementById('in-pin').value.trim();
+  const err  = document.getElementById('login-err');
+  if(!nama||!pin){ err.style.color='#C62828'; err.textContent='Isi nama dan PIN'; return; }
 
-  document.getElementById('login-err').textContent='Memverifikasi...';
-  document.getElementById('login-err').style.color='#2E7D32';
+  err.style.color='#2E7D32'; err.textContent='Memverifikasi...';
   try{
-    const r=await fetchApi({action:'login',nama,pin});
-    if(!r.ok){
-      document.getElementById('login-err').style.color='#C62828';
-      document.getElementById('login-err').textContent='Nama atau PIN salah';
-      return;
-    }
-    petugas=r.nama;
-    sessionStorage.setItem('iuran_petugas',petugas);
+    const r = await fetchApi({ action:'login', nama, pin });
+    if(!r.ok){ err.style.color='#C62828'; err.textContent='Nama atau PIN salah'; return; }
+    petugas = r.nama;
+    sessionStorage.setItem('iuran_petugas', petugas);
     masukApp();
-  }catch(e){
-    document.getElementById('login-err').style.color='#C62828';
-    document.getElementById('login-err').textContent='Gagal terhubung. Cek koneksi internet.';
+  } catch(e){
+    err.style.color='#C62828'; err.textContent='Gagal terhubung. Cek koneksi internet.';
   }
 }
 
 function masukApp(){
-  document.getElementById('screen-login').style.display='none';
-  document.getElementById('main').style.display='block';
-  document.getElementById('btn-out').textContent='👤 '+petugas;
-  document.getElementById('info-petugas').textContent=petugas;
-  const url=getUrl();
-  if(url){ document.getElementById('url-aktif').textContent=url; document.getElementById('url-input').value=url; }
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('main').style.display         = 'block';
+  document.getElementById('btn-out').textContent        = '👤 ' + petugas;
 }
 
 function doLogout(){
@@ -304,29 +228,29 @@ function doLogout(){
 }
 
 window.addEventListener('load',()=>{
-  const s=sessionStorage.getItem('iuran_petugas');
+  const s = sessionStorage.getItem('iuran_petugas');
   if(s){ petugas=s; masukApp(); }
-  const url=getUrl();
-  if(url){ document.getElementById('url-aktif').textContent=url; document.getElementById('url-input').value=url; }
 });
 
-document.getElementById('in-pin').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+document.getElementById('in-pin').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 
+// ── Tabs ──────────────────────────────────────────────────────
 function goTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-  const idx=['scan','rekap','setting'].indexOf(name);
+  const idx=['scan','rekap'].indexOf(name);
   document.querySelectorAll('.tab')[idx].classList.add('on');
   document.getElementById('pg-'+name).classList.add('on');
   if(name==='rekap') loadRekap();
 }
 
+// ── Scanner ───────────────────────────────────────────────────
 function startScan(){
   if(scanner) return;
-  scanner=new Html5Qrcode("reader");
+  scanner = new Html5Qrcode("reader");
   scanner.start(
     {facingMode:"environment"},
-    {fps:10,qrbox:{width:230,height:230}},
+    {fps:10, qrbox:{width:230,height:230}},
     onScan
   ).catch(()=>toast('Kamera tidak bisa diakses','err'));
 }
@@ -338,37 +262,39 @@ function stopScan(){
 async function onScan(txt){
   stopScan();
   let parsed;
-  try{ parsed=JSON.parse(txt); }catch(e){ toast('QR tidak valid','err'); return; }
+  try{ parsed=JSON.parse(txt); } catch(e){ toast('QR tidak valid','err'); return; }
   if(!parsed.kode){ toast('Format QR salah','err'); return; }
-  if(!getUrl()){ toast('Set URL dulu di Pengaturan','err'); return; }
+
   toast('Mengambil data...','');
   try{
-    const r=await fetchApi({action:'getStatus',kode:parsed.kode});
+    const r = await fetchApi({ action:'getStatus', kode:parsed.kode });
     if(!r.ok){ toast(r.msg,'err'); return; }
     showHasil(r);
-  }catch(e){ toast('Gagal terhubung','err'); }
+  } catch(e){ toast('Gagal terhubung','err'); }
 }
 
 function showHasil(data){
   scanKode=data.kode; scanStatus=data.status||{};
-  const cnt=Object.values(scanStatus).filter(Boolean).length;
-  document.getElementById('h-nama').textContent=data.nama;
-  document.getElementById('h-sub').textContent=data.kode+' - '+data.rt;
-  document.getElementById('h-kode').textContent=data.kode;
-  document.getElementById('h-namax').textContent=data.nama;
-  document.getElementById('h-rt').textContent=data.rt;
-  document.getElementById('h-lunas').textContent=cnt+' / 12 bulan';
-  const grid=document.getElementById('bulan-grid');
+  const cnt = Object.values(scanStatus).filter(Boolean).length;
+  document.getElementById('h-nama').textContent  = data.nama;
+  document.getElementById('h-sub').textContent   = data.kode+' - '+data.rt;
+  document.getElementById('h-kode').textContent  = data.kode;
+  document.getElementById('h-namax').textContent = data.nama;
+  document.getElementById('h-rt').textContent    = data.rt;
+  document.getElementById('h-lunas').textContent = cnt+' / 12 bulan';
+
+  const grid = document.getElementById('bulan-grid');
   grid.innerHTML='';
   BULAN.forEach(bln=>{
-    const done=scanStatus[bln]===true;
-    const b=document.createElement('button');
-    b.className='bulan-btn'+(done?' lunas':'');
-    b.textContent=(done?'✅ ':'')+bln;
-    b.dataset.bln=bln;
+    const done = scanStatus[bln]===true;
+    const b    = document.createElement('button');
+    b.className   = 'bulan-btn'+(done?' lunas':'');
+    b.textContent = (done?'✅ ':'')+bln;
+    b.dataset.bln = bln;
     if(!done) b.onclick=()=>b.classList.toggle('pick');
     grid.appendChild(b);
   });
+
   document.getElementById('hasil-box').style.display='block';
   document.getElementById('hasil-box').scrollIntoView({behavior:'smooth'});
 }
@@ -376,14 +302,15 @@ function showHasil(data){
 async function simpan(){
   const picks=[...document.querySelectorAll('.bulan-btn.pick')].map(b=>b.dataset.bln);
   if(!picks.length){ toast('Pilih minimal satu bulan','err'); return; }
+
   toast('Menyimpan ke Google Sheets...','');
   let ok=0;
   for(const bln of picks){
     try{
-      const r=await fetchApi({action:'bayar',kode:scanKode,bulan:bln,petugas});
+      const r = await fetchApi({ action:'bayar', kode:scanKode, bulan:bln, petugas });
       if(r.ok) ok++;
       else toast(r.msg,'err');
-    }catch(e){ toast('Gagal terhubung','err'); }
+    } catch(e){ toast('Gagal terhubung','err'); }
   }
   if(ok>0){ toast(ok+' bulan tersimpan!','ok'); setTimeout(resetScan,2200); }
 }
@@ -393,14 +320,15 @@ function resetScan(){
   document.getElementById('hasil-box').style.display='none';
 }
 
+// ── Rekap ─────────────────────────────────────────────────────
 async function loadRekap(){
   document.getElementById('area-rekap').innerHTML='<div class="loading"><div class="spin"></div> Memuat...</div>';
   try{
-    const r=await fetchApi({action:'getRekap'});
+    const r = await fetchApi({ action:'getRekap' });
     if(!r.ok){ document.getElementById('area-rekap').innerHTML='<p style="padding:16px;color:var(--red);font-size:13px">'+r.msg+'</p>'; return; }
     allWarga=r.data; renderRekap(allWarga);
-  }catch(e){
-    document.getElementById('area-rekap').innerHTML='<p style="padding:16px;color:var(--red);font-size:13px">Gagal. Cek URL di Pengaturan.</p>';
+  } catch(e){
+    document.getElementById('area-rekap').innerHTML='<p style="padding:16px;color:var(--red);font-size:13px">Gagal memuat data.</p>';
   }
 }
 
@@ -414,9 +342,10 @@ function renderRekap(data){
   const src=allWarga||data;
   const totL=src.reduce((s,w)=>s+w.lunas,0);
   const totB=src.length*12;
-  document.getElementById('s-total').textContent=src.length;
-  document.getElementById('s-lunas').textContent=totL;
-  document.getElementById('s-pct').textContent=totB>0?Math.round(totL/totB*100)+'%':'0%';
+  document.getElementById('s-total').textContent = src.length;
+  document.getElementById('s-lunas').textContent = totL;
+  document.getElementById('s-pct').textContent   = totB>0?Math.round(totL/totB*100)+'%':'0%';
+
   let h='<div class="tbl-wrap"><table><thead><tr><th>Kode</th><th>Nama</th><th>RT</th><th>Lunas</th><th>Status</th></tr></thead><tbody>';
   data.forEach(w=>{
     const cl=w.lunas===12?'b-lunas':'b-belum';
@@ -426,6 +355,7 @@ function renderRekap(data){
   document.getElementById('area-rekap').innerHTML=h+'</tbody></table></div>';
 }
 
+// ── Toast ─────────────────────────────────────────────────────
 function toast(msg,type){
   const el=document.getElementById('toast');
   el.textContent=msg;
