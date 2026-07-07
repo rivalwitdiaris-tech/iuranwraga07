@@ -81,9 +81,12 @@ th{background:var(--g-mid);color:white;padding:9px 8px;text-align:center;white-s
 td{padding:8px 7px;text-align:center;border-bottom:1px solid #F5F5F5}
 tr:last-child td{border:none}
 tr:nth-child(even) td{background:#FAFBFA}
-.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:800}
-.b-lunas{background:var(--g-tag);color:var(--g-dark)}
-.b-belum{background:var(--red-bg);color:var(--red)}
+.prog-wrap{width:100%;min-width:80px}
+.prog-label{font-size:10px;font-weight:700;margin-bottom:3px;display:flex;justify-content:space-between;align-items:center}
+.prog-label .frac{color:var(--g-dark)}
+.prog-label .pct{color:var(--gray)}
+.prog-bar{height:8px;background:#E5E5E5;border-radius:10px;overflow:hidden}
+.prog-fill{height:100%;border-radius:10px;transition:width .3s}
 
 .loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:28px;color:var(--gray);font-size:13px}
 .spin{width:20px;height:20px;border:3px solid #E0E0E0;border-top-color:var(--g-btn);border-radius:50%;animation:sp .8s linear infinite}
@@ -346,11 +349,24 @@ function renderRekap(data){
   document.getElementById('s-lunas').textContent = totL;
   document.getElementById('s-pct').textContent   = totB>0?Math.round(totL/totB*100)+'%':'0%';
 
-  let h='<div class="tbl-wrap"><table><thead><tr><th>Kode</th><th>Nama</th><th>RT</th><th>Lunas</th><th>Status</th></tr></thead><tbody>';
+  let h='<div class="tbl-wrap"><table><thead><tr><th>Kode</th><th>Nama</th><th>RT</th><th>Progress Pembayaran</th></tr></thead><tbody>';
   data.forEach(w=>{
-    const cl=w.lunas===12?'b-lunas':'b-belum';
-    const lb=w.lunas===12?'LUNAS':'BELUM';
-    h+=`<tr><td><strong style="color:var(--g-mid)">${w.kode}</strong></td><td style="text-align:left">${w.nama}</td><td>${w.rt}</td><td>${w.lunas}/12</td><td><span class="badge ${cl}">${lb}</span></td></tr>`;
+    const pct  = Math.round(w.lunas/12*100);
+    const clr  = w.lunas===12 ? '#388E3C' : w.lunas>=6 ? '#F9A825' : '#E53935';
+    h+=`<tr>
+      <td><strong style="color:var(--g-mid)">${w.kode}</strong></td>
+      <td style="text-align:left">${w.nama}</td>
+      <td>${w.rt}</td>
+      <td><div class="prog-wrap">
+        <div class="prog-label">
+          <span class="frac">${w.lunas}/12 bulan</span>
+          <span class="pct">${pct}%</span>
+        </div>
+        <div class="prog-bar">
+          <div class="prog-fill" style="width:${pct}%;background:${clr}"></div>
+        </div>
+      </div></td>
+    </tr>`;
   });
   document.getElementById('area-rekap').innerHTML=h+'</tbody></table></div>';
 }
