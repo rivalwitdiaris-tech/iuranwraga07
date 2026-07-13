@@ -133,6 +133,7 @@ tr:nth-child(even) td{background:#FAFBFA}
   <div class="tabs">
     <div class="tab on"  onclick="goTab('scan')">📷 Scan QR</div>
     <div class="tab"     onclick="goTab('rekap')">📊 Rekap</div>
+    <div class="tab"     onclick="goTab('log')">📋 Log</div>
   </div>
 
   <div class="page on" id="pg-scan">
@@ -172,6 +173,14 @@ tr:nth-child(even) td{background:#FAFBFA}
       <div class="card-title">📊 Status per Warga</div>
       <input class="search" type="text" id="in-cari" placeholder="🔍 Cari nama / kode..." oninput="filterRekap()">
       <div id="area-rekap"><div class="loading"><div class="spin"></div> Memuat...</div></div>
+    </div>
+  </div>
+
+  <div class="page" id="pg-log">
+    <div class="card">
+      <div class="card-title">📋 Log Pembayaran</div>
+      <input class="search" type="text" id="in-cari-log" placeholder="🔍 Cari nama / bulan / petugas..." oninput="filterLog()">
+      <div id="area-log"><div class="loading"><div class="spin"></div> Memuat...</div></div>
     </div>
   </div>
 </div>
@@ -241,10 +250,11 @@ document.getElementById('in-pin').addEventListener('keydown', e=>{ if(e.key==='E
 function goTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-  const idx=['scan','rekap'].indexOf(name);
+  const idx=['scan','rekap','log'].indexOf(name);
   document.querySelectorAll('.tab')[idx].classList.add('on');
   document.getElementById('pg-'+name).classList.add('on');
   if(name==='rekap') loadRekap();
+  if(name==='log')   loadLog();
 }
 
 // ── Scanner ───────────────────────────────────────────────────
@@ -369,6 +379,56 @@ function renderRekap(data){
     </tr>`;
   });
   document.getElementById('area-rekap').innerHTML=h+'</tbody></table></div>';
+}
+
+// ── Log Pembayaran ────────────────────────────────────────────
+let allLog = null;
+
+async function loadLog(){
+  document.getElementById('area-log').innerHTML='<div class="loading"><div class="spin"></div> Memuat log...</div>';
+  try{
+    const r = await fetchApi({ action:'getLog' });
+    if(!r.ok){ document.getElementById('area-log').innerHTML='<p style="padding:16px;color:var(--red);font-size:13px">'+r.msg+'</p>'; return; }
+    allLog = r.data;
+    renderLog(allLog);
+  } catch(e){
+    document.getElementById('area-log').innerHTML='<p style="padding:16px;color:var(--red);font-size:13px">Gagal memuat log.</p>';
+  }
+}
+
+function filterLog(){
+  if(!allLog) return;
+  const q=document.getElementById('in-cari-log').value.toLowerCase();
+  renderLog(allLog.filter(l=>
+    l.nama.toLowerCase().includes(q)||
+    l.bulan.toLowerCase().includes(q)||
+    l.petugas.toLowerCase().includes(q)||
+    l.kode.toLowerCase().includes(q)
+  ));
+}
+
+function renderLog(data){
+  if(!data||data.length===0){
+    document.getElementById('area-log').innerHTML='<p style="padding:16px;color:var(--gray);font-size:13px;text-align:center">Belum ada transaksi tercatat.</p>';
+    return;
+  }
+  let h='<div class="tbl-wrap"><table><thead><tr><th>#</th><th>Nama</th><th>Bulan</th><th>Tanggal & Jam</th><th>Petugas</th></tr></thead><tbody>';
+  // tampilkan dari yang terbaru
+  [...data].reverse().forEach((l,i)=>{
+    const bg = i%2===0?'':'background:#FAFBFA';
+    h+=`<tr style="${bg}">
+      <td style="color:var(--gray);font-size:11px">${data.length-i}</td>
+      <td style="text-align:left">
+        <strong style="color:var(--g-mid);font-size:11px">${l.kode}</strong><br>
+        <span style="font-size:12px">${l.nama}</span>
+      </td>
+      <td><span style="background:var(--g-tag);color:var(--g-dark);padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700">${l.bulan}</span></td>
+      <td style="font-size:11px;white-space:nowrap">${l.tgl}</td>
+      <td style="font-size:11px">${l.petugas}</td>
+    </tr>`;
+  });
+  h+='</tbody></table></div>';
+  document.getElementById('area-log').innerHTML=h;
 }
 
 // ── Toast ─────────────────────────────────────────────────────
