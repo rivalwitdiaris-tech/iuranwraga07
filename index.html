@@ -273,7 +273,7 @@ async function doLogin(){
     const r = await fetchApi({ action:'login', nama, pin });
     if(!r.ok){ err.style.color='#C62828'; err.textContent='Nama atau PIN salah'; return; }
     petugas = r.nama;
-    sessionStorage.setItem('iuran_petugas', petugas);
+    localStorage.setItem('iuran_petugas', petugas);
     masukApp();
   } catch(e){
     err.style.color='#C62828'; err.textContent='Gagal terhubung. Cek koneksi internet.';
@@ -288,12 +288,12 @@ function masukApp(){
 
 function doLogout(){
   if(!confirm('Yakin keluar?')) return;
-  sessionStorage.removeItem('iuran_petugas');
+  localStorage.removeItem('iuran_petugas');
   petugas=null; location.reload();
 }
 
 window.addEventListener('load',()=>{
-  const s = sessionStorage.getItem('iuran_petugas');
+  const s = localStorage.getItem('iuran_petugas');
   if(s){ petugas=s; masukApp(); }
 });
 
