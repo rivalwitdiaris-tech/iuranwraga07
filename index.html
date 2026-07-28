@@ -196,6 +196,48 @@ tr:nth-child(even) td{background:#FAFBFA}
   </div>
 </div>
 
+  <div class="page" id="pg-warga">
+    <div class="card">
+      <div class="card-title">➕ Tambah Warga Baru</div>
+      <div class="form-group">
+        <label>Nama Lengkap</label>
+        <input type="text" id="in-warga-nama" placeholder="contoh: Ahmad Santoso" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>RT</label>
+        <select id="in-warga-rt">
+          <option value="RT 07">RT 07</option>
+          <option value="RT 01">RT 01</option>
+          <option value="RT 02">RT 02</option>
+          <option value="RT 03">RT 03</option>
+          <option value="RT 04">RT 04</option>
+          <option value="RT 05">RT 05</option>
+          <option value="RT 06">RT 06</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Kode Warga (otomatis, bisa diedit)</label>
+        <input type="text" id="in-warga-kode" placeholder="contoh: WRG-094">
+      </div>
+      <button class="btn btn-g" onclick="tambahWarga()">✅ Simpan & Buat QR</button>
+      <div class="qr-result" id="qr-result">
+        <h3 id="qr-nama-label">-</h3>
+        <p id="qr-kode-label">-</p>
+        <div id="qr-canvas"></div>
+        <button class="btn btn-g btn-sm" onclick="downloadQR()" style="width:auto;margin:8px auto 0">⬇ Download QR</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📝 Panduan</div>
+      <p style="font-size:12px;color:#424242;line-height:2">
+        • Format kode: <strong>WRG-XXX</strong> (angka 3 digit)<br>
+        • Kode harus unik, tidak boleh sama dengan warga lain<br>
+        • Setelah simpan, data langsung masuk Google Sheets<br>
+        • Download QR lalu cetak dan berikan ke warga
+      </p>
+    </div>
+  </div>
+
 <div id="toast"></div>
 
 <script>
