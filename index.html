@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Iuran Warga RT</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root{
   --g-dark:#1B5E20;--g-mid:#2E7D32;--g-btn:#388E3C;
@@ -89,6 +90,15 @@ tr:nth-child(even) td{background:#FAFBFA}
 .prog-fill{height:100%;border-radius:10px;transition:width .3s}
 
 .loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:28px;color:var(--gray);font-size:13px}
+.form-group{margin-bottom:14px}
+.form-group label{font-size:11px;font-weight:700;color:var(--g-mid);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.form-group input,.form-group select{width:100%;padding:12px 14px;border:2px solid #E5E5E5;border-radius:10px;font-size:14px;outline:none;transition:border .2s;background:white}
+.form-group input:focus,.form-group select:focus{border-color:var(--g-mid)}
+.qr-result{display:none;text-align:center;margin-top:16px;padding:20px;background:var(--g-lite);border-radius:12px;border:2px solid var(--g-tag)}
+.qr-result h3{font-size:14px;font-weight:800;color:var(--g-dark);margin-bottom:4px}
+.qr-result p{font-size:12px;color:var(--gray);margin-bottom:14px}
+#qr-canvas{display:flex;justify-content:center;margin-bottom:14px}
+#qr-canvas canvas{border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .spin{width:20px;height:20px;border:3px solid #E0E0E0;border-top-color:var(--g-btn);border-radius:50%;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
@@ -134,6 +144,7 @@ tr:nth-child(even) td{background:#FAFBFA}
     <div class="tab on"  onclick="goTab('scan')">📷 Scan QR</div>
     <div class="tab"     onclick="goTab('rekap')">📊 Rekap</div>
     <div class="tab"     onclick="goTab('log')">📋 Log</div>
+    <div class="tab"     onclick="goTab('warga')">➕ Warga</div>
   </div>
 
   <div class="page on" id="pg-scan">
@@ -250,11 +261,12 @@ document.getElementById('in-pin').addEventListener('keydown', e=>{ if(e.key==='E
 function goTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-  const idx=['scan','rekap','log'].indexOf(name);
+  const idx=['scan','rekap','log','warga'].indexOf(name);
   document.querySelectorAll('.tab')[idx].classList.add('on');
   document.getElementById('pg-'+name).classList.add('on');
   if(name==='rekap') loadRekap();
   if(name==='log')   loadLog();
+  if(name==='warga') initFormWarga();
 }
 
 // ── Scanner ───────────────────────────────────────────────────
@@ -429,6 +441,77 @@ function renderLog(data){
   });
   h+='</tbody></table></div>';
   document.getElementById('area-log').innerHTML=h;
+}
+
+// ── Tambah Warga ──────────────────────────────────────────────
+let qrInstance = null;
+
+async function initFormWarga(){
+  // Ambil kode terakhir dari rekap untuk saran kode berikutnya
+  try{
+    if(!allWarga){
+      const r = await fetchApi({ action:'getRekap' });
+      if(r.ok) allWarga = r.data;
+    }
+    if(allWarga && allWarga.length > 0){
+      const lastNo = allWarga.length + 1;
+      document.getElementById('in-warga-kode').value = 'WRG-' + String(lastNo).padStart(3,'0');
+    }
+  } catch(e){}
+}
+
+async function tambahWarga(){
+  const nama = document.getElementById('in-warga-nama').value.trim();
+  const rt   = document.getElementById('in-warga-rt').value;
+  const kode = document.getElementById('in-warga-kode').value.trim().toUpperCase();
+
+  if(!nama){ toast('Isi nama warga dulu','err'); return; }
+  if(!kode || !kode.startsWith('WRG-')){ toast('Format kode harus WRG-XXX','err'); return; }
+
+  toast('Menyimpan ke Google Sheets...','');
+  try{
+    const r = await fetchApi({ action:'tambahWarga', kode, nama, rt });
+    if(!r.ok){ toast(r.msg,'err'); return; }
+
+    // Tampilkan QR
+    document.getElementById('qr-nama-label').textContent = nama;
+    document.getElementById('qr-kode-label').textContent = kode + '  |  ' + rt;
+
+    const payload = JSON.stringify({ kode, nama, rt });
+    const container = document.getElementById('qr-canvas');
+    container.innerHTML = '';
+
+    if(qrInstance){ qrInstance.clear(); qrInstance = null; }
+    qrInstance = new QRCode(container, {
+      text: payload,
+      width: 200,
+      height: 200,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    document.getElementById('qr-result').style.display = 'block';
+    document.getElementById('qr-result').scrollIntoView({ behavior:'smooth' });
+    toast('Warga berhasil ditambahkan!','ok');
+
+    // Reset form
+    document.getElementById('in-warga-nama').value = '';
+    allWarga = null; // reset cache rekap
+  } catch(e){
+    toast('Gagal terhubung','err');
+  }
+}
+
+function downloadQR(){
+  const canvas = document.querySelector('#qr-canvas canvas');
+  if(!canvas){ toast('QR belum dibuat','err'); return; }
+  const kode = document.getElementById('qr-kode-label').textContent.split('|')[0].trim();
+  const a    = document.createElement('a');
+  a.href     = canvas.toDataURL('image/png');
+  a.download = 'QR_' + kode + '.png';
+  a.click();
+  toast('QR berhasil didownload!','ok');
 }
 
 // ── Toast ─────────────────────────────────────────────────────
