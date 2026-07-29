@@ -90,6 +90,18 @@ tr:nth-child(even) td{background:#FAFBFA}
 .prog-fill{height:100%;border-radius:10px;transition:width .3s}
 
 .loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:28px;color:var(--gray);font-size:13px}
+.mode-toggle{display:flex;background:#F0F4F0;border-radius:10px;padding:4px;margin-bottom:14px;gap:4px}
+.mode-btn{flex:1;padding:9px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--gray);transition:all .2s}
+.mode-btn.on{background:white;color:var(--g-dark);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.cari-warga{width:100%;padding:11px 14px;border:2px solid #E5E5E5;border-radius:10px;font-size:14px;outline:none;transition:border .2s;margin-bottom:8px}
+.cari-warga:focus{border-color:var(--g-mid)}
+.hasil-cari{max-height:280px;overflow-y:auto;border:1px solid #E5E5E5;border-radius:10px;display:none}
+.item-warga{padding:11px 14px;border-bottom:1px solid #F5F5F5;cursor:pointer;transition:background .15s;display:flex;justify-content:space-between;align-items:center}
+.item-warga:last-child{border-bottom:none}
+.item-warga:hover{background:var(--g-lite)}
+.item-warga .iw-nama{font-size:13px;font-weight:600;color:var(--text)}
+.item-warga .iw-info{font-size:11px;color:var(--gray);margin-top:2px}
+.item-warga .iw-kode{font-size:11px;font-weight:700;color:var(--g-mid)}
 .form-group{margin-bottom:14px}
 .form-group label{font-size:11px;font-weight:700;color:var(--g-mid);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
 .form-group input,.form-group select{width:100%;padding:12px 14px;border:2px solid #E5E5E5;border-radius:10px;font-size:14px;outline:none;transition:border .2s;background:white}
@@ -149,11 +161,26 @@ tr:nth-child(even) td{background:#FAFBFA}
 
   <div class="page on" id="pg-scan">
     <div class="card">
-      <div class="card-title">📷 Scan QR Warga</div>
-      <div id="reader"></div>
-      <div class="btn-row">
-        <button class="btn btn-g btn-sm" onclick="startScan()">▶ Mulai</button>
-        <button class="btn btn-o btn-sm" onclick="stopScan()">⏹ Stop</button>
+      <div class="card-title">💳 Input Pembayaran</div>
+      <div class="mode-toggle">
+        <button class="mode-btn on" id="mode-qr"  onclick="setMode('qr')">📷 Scan QR</button>
+        <button class="mode-btn"   id="mode-cari" onclick="setMode('cari')">🔍 Cari Manual</button>
+      </div>
+
+      <!-- MODE QR -->
+      <div id="panel-qr">
+        <div id="reader"></div>
+        <div class="btn-row">
+          <button class="btn btn-g btn-sm" onclick="startScan()">▶ Mulai</button>
+          <button class="btn btn-o btn-sm" onclick="stopScan()">⏹ Stop</button>
+        </div>
+      </div>
+
+      <!-- MODE MANUAL -->
+      <div id="panel-cari" style="display:none">
+        <input class="cari-warga" type="text" id="in-cari-warga"
+               placeholder="Ketik nama warga..." oninput="cariWarga()">
+        <div class="hasil-cari" id="hasil-cari-warga"></div>
       </div>
     </div>
     <div id="hasil-box">
@@ -554,6 +581,72 @@ function downloadQR(){
   a.download = 'QR_' + kode + '.png';
   a.click();
   toast('QR berhasil didownload!','ok');
+}
+
+// ── Mode Toggle ──────────────────────────────────────────────
+function setMode(mode) {
+  document.getElementById('mode-qr').classList.toggle('on', mode==='qr');
+  document.getElementById('mode-cari').classList.toggle('on', mode==='cari');
+  document.getElementById('panel-qr').style.display   = mode==='qr'   ? 'block' : 'none';
+  document.getElementById('panel-cari').style.display = mode==='cari' ? 'block' : 'none';
+  if(mode==='qr') stopScan();
+  if(mode==='cari') {
+    document.getElementById('in-cari-warga').value='';
+    document.getElementById('hasil-cari-warga').style.display='none';
+    document.getElementById('hasil-cari-warga').innerHTML='';
+    if(!allWarga) muatListWarga();
+  }
+}
+
+let listWarga = null;
+
+async function muatListWarga() {
+  try {
+    const r = await fetchApi({ action:'getRekap' });
+    if(r.ok){ listWarga = r.data; allWarga = r.data; }
+  } catch(e) {}
+}
+
+function cariWarga() {
+  const q = document.getElementById('in-cari-warga').value.toLowerCase().trim();
+  const box = document.getElementById('hasil-cari-warga');
+
+  if(!q){ box.style.display='none'; return; }
+
+  const src = listWarga || allWarga;
+  if(!src){ toast('Data belum dimuat, coba lagi','err'); return; }
+
+  const hasil = src.filter(w =>
+    w.nama.toLowerCase().includes(q) || w.kode.toLowerCase().includes(q)
+  ).slice(0, 15);
+
+  if(!hasil.length){
+    box.innerHTML='<div class="item-warga"><span class="iw-nama" style="color:var(--gray)">Warga tidak ditemukan</span></div>';
+    box.style.display='block';
+    return;
+  }
+
+  box.innerHTML = hasil.map(w => `
+    <div class="item-warga" onclick="pilihWarga('${w.kode}')">
+      <div>
+        <div class="iw-nama">${w.nama}</div>
+        <div class="iw-info">${w.rt} &nbsp;|&nbsp; Lunas: ${w.lunas}/12</div>
+      </div>
+      <div class="iw-kode">${w.kode}</div>
+    </div>
+  `).join('');
+  box.style.display = 'block';
+}
+
+async function pilihWarga(kode) {
+  document.getElementById('hasil-cari-warga').style.display='none';
+  document.getElementById('in-cari-warga').value='';
+  toast('Mengambil data...','');
+  try {
+    const r = await fetchApi({ action:'getStatus', kode });
+    if(!r.ok){ toast(r.msg,'err'); return; }
+    showHasil(r);
+  } catch(e){ toast('Gagal terhubung','err'); }
 }
 
 // ── Toast ─────────────────────────────────────────────────────
