@@ -90,6 +90,11 @@ tr:nth-child(even) td{background:#FAFBFA}
 .prog-fill{height:100%;border-radius:10px;transition:width .3s}
 
 .loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:28px;color:var(--gray);font-size:13px}
+.btn-wa{background:#25D366;color:white;border:none;border-radius:11px;padding:13px;width:100%;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;transition:all .15s}
+.btn-wa:active{transform:scale(.97)}
+.btn-wa:hover{background:#128C7E}
+.notif-wa{display:none;background:#E8F5E9;border:1.5px solid #25D366;border-radius:12px;padding:14px;margin-top:12px;text-align:center}
+.notif-wa p{font-size:12px;color:#1B5E20;margin-bottom:10px;line-height:1.6}
 .mode-toggle{display:flex;background:#F0F4F0;border-radius:10px;padding:4px;margin-bottom:14px;gap:4px}
 .mode-btn{flex:1;padding:9px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--gray);transition:all .2s}
 .mode-btn.on{background:white;color:var(--g-dark);box-shadow:0 1px 4px rgba(0,0,0,.12)}
@@ -197,6 +202,15 @@ tr:nth-child(even) td{background:#FAFBFA}
         <div class="bulan-grid" id="bulan-grid"></div>
         <button class="btn btn-g" onclick="simpan()">💾 Simpan Pembayaran</button>
         <button class="btn btn-o" style="margin-top:8px" onclick="resetScan()">🔄 Scan Lagi</button>
+
+        <!-- Notif WA -->
+        <div class="notif-wa" id="notif-wa">
+          <p id="wa-preview"></p>
+          <button class="btn-wa" onclick="kirimWA()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.558 4.116 1.535 5.845L.057 23.457a.5.5 0 0 0 .611.611l5.612-1.478A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.659-.52-5.168-1.423l-.371-.22-3.833 1.009 1.01-3.833-.22-.371A9.944 9.944 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+            Kirim Notif WhatsApp
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -399,19 +413,50 @@ async function simpan(){
 
   toast('Menyimpan ke Google Sheets...','');
   let ok=0;
+  const berhasilBulan=[];
   for(const bln of picks){
     try{
       const r = await fetchApi({ action:'bayar', kode:scanKode, bulan:bln, petugas });
-      if(r.ok) ok++;
+      if(r.ok){ ok++; berhasilBulan.push(bln); }
       else toast(r.msg,'err');
     } catch(e){ toast('Gagal terhubung','err'); }
   }
-  if(ok>0){ toast(ok+' bulan tersimpan!','ok'); setTimeout(resetScan,2200); }
+  if(ok>0){
+    toast(ok+' bulan tersimpan!','ok');
+    // Tampilkan tombol kirim WA
+    const nama  = document.getElementById('h-namax').textContent;
+    const bulanStr = berhasilBulan.join(', ');
+    const preview = '✅ *IURAN RT 07 LUNAS*\n\n' +
+      'Nama   : ' + nama + '\n' +
+      'Bulan  : ' + bulanStr + '\n' +
+      'Petugas: ' + petugas + '\n\n' +
+      'Terima kasih telah membayar iuran tepat waktu 🙏';
+    document.getElementById('wa-preview').textContent = preview;
+    document.getElementById('notif-wa').style.display = 'block';
+    // Sembunyikan tombol simpan agar tidak double klik
+    document.querySelector('.btn-g[onclick="simpan()"]').style.display='none';
+  }
+}
+
+let waUrl = '';
+function kirimWA(){
+  const nama  = document.getElementById('h-namax').textContent;
+  const picks = [...document.querySelectorAll('.bulan-btn.lunas')];
+  const bulanStr = picks.slice(-1).map(b=>b.textContent.replace('✅ ','')).join('');
+  const pesan = '✅ *IURAN RT 07 LUNAS*%0A%0A' +
+    'Nama   : ' + encodeURIComponent(nama) + '%0A' +
+    'Petugas: ' + encodeURIComponent(petugas) + '%0A%0A' +
+    'Terima kasih telah membayar iuran tepat waktu 🙏';
+  // Buka WA tanpa nomor — petugas pilih kontak sendiri
+  window.open('https://wa.me/?text=' + pesan, '_blank');
 }
 
 function resetScan(){
   scanKode=null; scanStatus={};
   document.getElementById('hasil-box').style.display='none';
+  document.getElementById('notif-wa').style.display='none';
+  const btnSimpan = document.querySelector('.btn-g[onclick="simpan()"]');
+  if(btnSimpan) btnSimpan.style.display='flex';
 }
 
 // ── Rekap ─────────────────────────────────────────────────────
