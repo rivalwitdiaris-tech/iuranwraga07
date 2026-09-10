@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Status Iuran Warga RT 07</title>
+<style>
+:root{
+  --g-dark:#1B5E20;--g-mid:#2E7D32;--g-btn:#388E3C;
+  --g-lite:#E8F5E9;--g-tag:#C8E6C9;
+  --red:#C62828;--red-bg:#FFEBEE;--yellow:#F9A825;
+  --white:#FFFFFF;--bg:#F0F4F0;--gray:#9E9E9E;--text:#1A1A1A;
+  --r:14px;--sh:0 2px 12px rgba(0,0,0,.09);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:linear-gradient(135deg,var(--g-dark) 0%,var(--g-btn) 100%);color:white;padding:24px 20px;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.2)}
+header .ikon{font-size:40px;margin-bottom:8px}
+header h1{font-size:20px;font-weight:800}
+header p{font-size:12px;opacity:.8;margin-top:4px}
+.periode{display:inline-block;background:rgba(255,255,255,.2);padding:4px 14px;border-radius:20px;font-size:11px;font-weight:600;margin-top:8px}
+.wrap{max-width:560px;margin:0 auto;padding:16px}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:white;border-radius:var(--r);padding:14px 8px;text-align:center;box-shadow:var(--sh)}
+.stat .num{font-size:24px;font-weight:800;color:var(--g-dark)}
+.stat .lbl{font-size:10px;color:var(--gray);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.card{background:white;border-radius:var(--r);padding:16px;margin-bottom:13px;box-shadow:var(--sh)}
+.card-title{font-size:13px;font-weight:800;color:var(--g-dark);margin-bottom:13px;display:flex;align-items:center;gap:7px}
+.search{width:100%;padding:11px 14px;border:2px solid #E5E5E5;border-radius:10px;font-size:14px;outline:none;margin-bottom:12px;transition:border .2s}
+.search:focus{border-color:var(--g-mid)}
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid #E5E5E5}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--g-mid);color:white;padding:9px 8px;text-align:center;white-space:nowrap;font-weight:700}
+td{padding:8px 7px;text-align:center;border-bottom:1px solid #F5F5F5}
+tr:last-child td{border:none}
+tr:nth-child(even) td{background:#FAFBFA}
+tr:hover td{background:var(--g-lite)}
+.prog-wrap{width:100%;min-width:90px}
+.prog-label{font-size:10px;font-weight:700;margin-bottom:3px;display:flex;justify-content:space-between}
+.prog-label .frac{color:var(--g-dark)}
+.prog-label .pct{color:var(--gray)}
+.prog-bar{height:7px;background:#E5E5E5;border-radius:10px;overflow:hidden}
+.prog-fill{height:100%;border-radius:10px}
+.loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:32px;color:var(--gray);font-size:13px}
+.spin{width:20px;height:20px;border:3px solid #E0E0E0;border-top-color:var(--g-btn);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;padding:16px}
+.modal-bg.show{display:flex}
+.modal{background:white;border-radius:18px;width:100%;max-width:420px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-hdr{background:var(--g-dark);color:white;padding:16px 18px}
+.modal-hdr h3{font-size:16px;font-weight:800}
+.modal-hdr p{font-size:11px;opacity:.75;margin-top:2px}
+.modal-body{padding:16px 18px}
+.bulan-list{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.bulan-item{padding:8px 4px;border-radius:8px;text-align:center;font-size:10px;font-weight:700;border:2px solid}
+.bulan-item.lunas{background:var(--g-tag);border-color:var(--g-btn);color:var(--g-dark)}
+.bulan-item.belum{background:var(--red-bg);border-color:#FFCDD2;color:var(--red)}
+.modal-close{width:100%;padding:11px;background:var(--g-btn);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
+.info-bar{background:var(--g-lite);border-left:4px solid var(--g-btn);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--g-dark);line-height:1.7;margin-bottom:14px}
+.last-update{text-align:center;font-size:11px;color:var(--gray);margin-top:8px;padding-bottom:24px}
+.badge-lunas{background:var(--g-tag);color:var(--g-dark);display:inline-block;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:800}
+.badge-belum{background:var(--red-bg);color:var(--red);display:inline-block;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:800}
+</style>
+</head>
+<body>
+<header>
+  <div class="ikon">&#127968;</div>
+  <h1>Status Iuran Warga RT 07</h1>
+  <p>Cek status pembayaran iuran secara real-time</p>
+  <div class="periode">Agustus 2026 &mdash; Juli 2027</div>
+</header>
+<div class="wrap">
+  <div class="stat-grid">
+    <div class="stat"><div class="num" id="s-total">-</div><div class="lbl">Total Warga</div></div>
+    <div class="stat"><div class="num" id="s-lunas" style="color:var(--g-btn)">-</div><div class="lbl">Sudah Lunas</div></div>
+    <div class="stat"><div class="num" id="s-belum" style="color:var(--red)">-</div><div class="lbl">Belum Lunas</div></div>
+  </div>
+  <div class="info-bar">
+    Klik nama warga untuk melihat detail pembayaran per bulan.<br>
+    Halaman ini bersifat <strong>publik</strong> &mdash; hanya bisa dilihat, tidak bisa diubah.
+  </div>
+  <div class="card">
+    <div class="card-title">&#128203; Rekap Status Iuran</div>
+    <input class="search" type="text" id="in-cari" placeholder="Cari nama warga..." oninput="filter()">
+    <div id="area-rekap">
+      <div class="loading"><div class="spin"></div> Memuat data...</div>
+    </div>
+  </div>
+  <div class="last-update" id="last-update"></div>
+</div>
+
+<div class="modal-bg" id="modal" onclick="tutupModal(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 id="m-nama">-</h3>
+      <p id="m-sub">-</p>
+    </div>
+    <div class="modal-body">
+      <div class="bulan-list" id="m-bulan"></div>
+      <button class="modal-close" onclick="tutupModal()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Gunakan GET request — tidak kena CORS seperti POST
+const APPS_URL = "https://script.google.com/macros/s/AKfycbxRFTR4Tn61VwOCqSh2pNWfU3BIluDqVN54Cq3lYavGZ8PVrB43JXGx_unWnR1GjIP-pQ/exec";
+const BULAN = [
+  "Agustus 2026","September 2026","Oktober 2026","November 2026",
+  "Desember 2026","Januari 2027","Februari 2027","Maret 2027",
+  "April 2027","Mei 2027","Juni 2027","Juli 2027"
+];
+
+let allWarga = null;
+
+async function muatData() {
+  try {
+    // Pakai GET + parameter action, bukan POST
+    const resp = await fetch(APPS_URL + "?action=getRekap", {
+      method: "GET",
+      redirect: "follow"
+    });
+    const r = await resp.json();
+    if (!r.ok) { tampilError(r.msg); return; }
+    allWarga = r.data;
+    render(allWarga);
+    document.getElementById("last-update").textContent =
+      "Terakhir diperbarui: " + new Date().toLocaleString("id-ID");
+  } catch(e) {
+    tampilError("Gagal memuat data: " + e.message);
+  }
+}
+
+function tampilError(msg) {
+  document.getElementById("area-rekap").innerHTML =
+    "<p style='padding:20px;color:var(--red);text-align:center;font-size:13px'>Gagal memuat: " + msg + "</p>";
+}
+
+function filter() {
+  if (!allWarga) return;
+  const q = document.getElementById("in-cari").value.toLowerCase();
+  render(allWarga.filter(w => w.nama.toLowerCase().includes(q) || w.kode.toLowerCase().includes(q)));
+}
+
+function render(data) {
+  const src = allWarga || data;
+  const lunasPenuh = src.filter(w => w.lunas === 12).length;
+  document.getElementById("s-total").textContent = src.length;
+  document.getElementById("s-lunas").textContent = lunasPenuh;
+  document.getElementById("s-belum").textContent = src.length - lunasPenuh;
+
+  if (!data.length) {
+    document.getElementById("area-rekap").innerHTML =
+      "<p style='padding:20px;color:var(--gray);text-align:center;font-size:13px'>Warga tidak ditemukan</p>";
+    return;
+  }
+
+  let h = "<div class='tbl-wrap'><table><thead><tr><th>No</th><th>Nama</th><th>Progress</th><th>Status</th></tr></thead><tbody>";
+  data.forEach((w, i) => {
+    const pct = Math.round(w.lunas / 12 * 100);
+    const clr = w.lunas === 12 ? "#388E3C" : w.lunas >= 6 ? "#F9A825" : "#E53935";
+    const badge = w.lunas === 12
+      ? "<span class='badge-lunas'>LUNAS</span>"
+      : "<span class='badge-belum'>BELUM</span>";
+    h += "<tr style='cursor:pointer' onclick='lihatDetail(\"" + w.kode + "\")'>" +
+      "<td style='color:var(--gray);font-size:11px'>" + (i+1) + "</td>" +
+      "<td style='text-align:left'><strong style='font-size:12px'>" + w.nama + "</strong><br>" +
+      "<span style='font-size:10px;color:var(--gray)'>" + w.kode + "</span></td>" +
+      "<td><div class='prog-wrap'><div class='prog-label'>" +
+      "<span class='frac'>" + w.lunas + "/12</span><span class='pct'>" + pct + "%</span></div>" +
+      "<div class='prog-bar'><div class='prog-fill' style='width:" + pct + "%;background:" + clr + "'></div></div></div></td>" +
+      "<td>" + badge + "</td></tr>";
+  });
+  h += "</tbody></table></div>";
+  document.getElementById("area-rekap").innerHTML = h;
+}
+
+function lihatDetail(kode) {
+  const w = allWarga.find(x => x.kode === kode);
+  if (!w) return;
+  document.getElementById("m-nama").textContent = w.nama;
+  document.getElementById("m-sub").textContent  = w.kode + "  |  " + w.rt + "  |  Lunas " + w.lunas + "/12";
+  const list = document.getElementById("m-bulan");
+  list.innerHTML = BULAN.map(bln => {
+    const lunas = w.status && w.status[bln] === true;
+    return "<div class='bulan-item " + (lunas?"lunas":"belum") + "'>" +
+           (lunas?"&#10003;":"&#10007;") + "<br>" + bln + "</div>";
+  }).join("");
+  document.getElementById("modal").classList.add("show");
+}
+
+function tutupModal(e) {
+  if (!e || e.target === document.getElementById("modal")) {
+    document.getElementById("modal").classList.remove("show");
+  }
+}
+
+muatData();
+setInterval(muatData, 5 * 60 * 1000);
+</script>
+</body>
+</html>
